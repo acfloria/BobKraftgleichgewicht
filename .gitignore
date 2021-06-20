@@ -1,0 +1,6 @@
+*.pyc
+__pycache__
+*.hdf5
+__pycache__*
+.project
+.cproject
