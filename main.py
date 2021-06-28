@@ -1,4 +1,6 @@
 from BobKraftVisApp import BobKraftVisApp
+import matplotlib
+matplotlib.rcParams['figure.dpi'] = 100
 
 def main():
     app = BobKraftVisApp()
