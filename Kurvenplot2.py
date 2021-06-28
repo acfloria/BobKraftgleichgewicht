@@ -66,7 +66,8 @@ class Kurvenplot2(FigureCanvasQTAgg):
                                [start[1], start[1] + a_tangential * np.sin(angle) / self.g],
                                 linewidth=4, color=color, solid_capstyle='butt', label='$F_{tan}$')
         self.axes[0].add_line(a_tan)
-        self.axes[0].legend(handles = [a_fg, a_cf, a_tot, a_rad, a_tan])
+        self.axes[0].set_xlim(left=-1.0)
+        self.axes[0].legend(handles = [a_fg, a_cf, a_tot, a_rad, a_tan], bbox_to_anchor=(1.05, 1.0), loc='upper left')
         
         # draw sled top - down (Achsabstand: 2.13 m, Spurbreite: 0.67 m, pro achse + 0.6 m
         size_bob_td = (3.33, 0.60)
@@ -98,15 +99,21 @@ class Kurvenplot2(FigureCanvasQTAgg):
         a_tan_back = np.cos(angle+angle_diff) * a_centrifugal * (1.0 + g_difference) - np.sin(angle+angle_diff) * self.g
         a_forward = (a_tan_front + a_tan_back) * np.sin(angle_sled)
 
+        scaling_front_back = int((1.0 / min(max(0.1, min(float(0.1 * round(float(np.abs(a_tan_front))/0.1)), 1)), max(0.1, min(float(0.1 * round(float(np.abs(a_tan_back))/0.1)), 1.0))))) * 0.5
+        scaling_combined = scaling_front_back # max(int(0.1 * round(float(1.0 / np.abs(a_tan_back + a_tan_front))/0.1)), 0.1)
+        scaling_forward = int((1.0 / min(max(0.1, min(float(0.1 * round(float(np.abs(a_forward))/0.1)), 1)), max(0.1, min(float(0.1 * round(float(np.abs(a_forward))/0.1)), 1.0))))) * 0.5
+
         center_front_axle = np.matmul(R_td, np.array([-1.065, 0]))
         center_back_axle = np.matmul(R_td, np.array([1.065, 0]))
-        arrow_tan_front = self.axes[1].arrow(center_front_axle[0], center_front_axle[1], 0, a_tan_front / self.g, width=0.05, color='blue', length_includes_head=True, label='$F_{tan front}$')
-        arrow_tan_back = self.axes[1].arrow(center_back_axle[0], center_back_axle[1], 0, a_tan_back / self.g, width=0.05, color='cyan', length_includes_head=True, label='$F_{tan back}$')
-        arrow_combined = self.axes[1].arrow(0, 0, 0, (a_tan_back + a_tan_front), width=0.05, color='gold', length_includes_head=True, label='$F_{tan tot} \cdot 10$')
-        arrow_forward = self.axes[1].arrow(0, 0, 4*a_forward*np.cos(angle_sled), 4*a_forward*np.sin(angle_sled), width=0.05, color='green', length_includes_head=True, label='$F_{forward} \cdot 40$')
+        arrow_tan_front = self.axes[1].arrow(center_front_axle[0], center_front_axle[1], 0, a_tan_front * scaling_front_back, width=0.05, color='blue', length_includes_head=True, label='$F_{tan front} \cdot %d$' % (scaling_front_back * 10))
+        arrow_tan_back = self.axes[1].arrow(center_back_axle[0], center_back_axle[1], 0, a_tan_back * scaling_front_back, width=0.05, color='cyan', length_includes_head=True, label='$F_{tan back} \cdot %d$' % (scaling_front_back * 10))
+        arrow_combined = self.axes[1].arrow(0, 0, 0, (a_tan_back + a_tan_front) * scaling_combined, width=0.05, color='gold', length_includes_head=True, label='$F_{tan tot} \cdot %d$' % (scaling_combined * 10))
+        arrow_forward = self.axes[1].arrow(0, 0, scaling_forward*a_forward*np.cos(angle_sled), scaling_forward*a_forward*np.sin(angle_sled), width=0.05, color='green', length_includes_head=True, label='$F_{forward} \cdot %d$' % (scaling_forward * 10))
 
-        self.axes[1].legend(handles = [arrow_tan_front, arrow_tan_back, arrow_combined, arrow_forward])
-        self.axes[1].set_ylim([-1.5, 1.5])
+        self.axes[1].legend(handles = [arrow_tan_front, arrow_tan_back, arrow_combined, arrow_forward], bbox_to_anchor=(1.05, 1.0), loc='upper left')
+        lim_max = max(max(1.5, a_tan_front * scaling_front_back + 0.5), a_tan_back * scaling_front_back + 0.5)
+        lim_min = min(min(-1.5, a_tan_front * scaling_front_back - 0.5), a_tan_back * scaling_front_back - 0.5)
+        self.axes[1].set_ylim([lim_min, lim_max])
 
         self.axes[0].set_aspect('equal', 'box')
         self.axes[1].set_aspect('equal', 'box')
