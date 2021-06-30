@@ -67,6 +67,8 @@ class Kurvenplot(FigureCanvasQTAgg):
         self.axes.add_line(a_tan)
         self.axes.legend(handles = [a_fg, a_cf, a_tot, a_rad, a_tan], bbox_to_anchor=(1.05, 1.0), loc='upper left')
         self.axes.set_xlim(left=-1.0)
+
+        self.fig.tight_layout()
         self.fig.canvas.draw_idle()
 
     def redraw(self):

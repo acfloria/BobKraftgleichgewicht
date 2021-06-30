@@ -117,6 +117,8 @@ class Kurvenplot2(FigureCanvasQTAgg):
 
         self.axes[0].set_aspect('equal', 'box')
         self.axes[1].set_aspect('equal', 'box')
+
+        self.fig.tight_layout()
         self.fig.canvas.draw_idle()
 
     def redraw(self):
